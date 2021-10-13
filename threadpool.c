@@ -42,7 +42,7 @@ void bigparam(uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint64_t e, uint64
 
 
 void *asmtf_thread_loop(void *data) {
-    // Save thread data to stack. This ensures thread data access 
+    // Copy thread data to stack
     asmtf_thread_t thread;
     memcpy(&thread,data,sizeof(asmtf_thread_t));
 
@@ -50,19 +50,19 @@ void *asmtf_thread_loop(void *data) {
         do {
             thread.task = asmtf_thread_get_next_task(thread.task_buffer);
         }while(!thread.task);
-
-        //Save 16 all general purpose registers to threads internal buffer
-        ASMTF_THREAD_SAVE_REGISTERS(thread);
         
-        //
         uintptr_t tptr = atomic_exchange(&thread.task->p_function,0);
-        if(!tptr)
+        if(!tptr){
             continue;
+        }
+        //Save state to stack
+        ASMTF_THREAD_SAVE_REGISTERS(thread);
         ASMTF_THREAD_LOAD_TASK_P(thread.task);
         __asm__("call %0\n\t"
                 :
                 : "m"(tptr)
                 :);
+        //Restore state from stack
         ASMTF_THREAD_LOAD_REGISTERS(thread);
         
     }
@@ -73,6 +73,8 @@ void asmtf_init_thread(asmtf_thread_t **thread) {
     uint64_t allocSize;
     *thread = malloc(sizeof(asmtf_thread_t));
     asmtf_task_buffer_t *task_buffer = calloc(1,sizeof(asmtf_task_buffer_t));
+
+    //align buffer to cache lines
     task_buffer->base = aligned_alloc(64,sizeof(asmtf_task_t)*1024);
     task_buffer->size = 1024;
     task_buffer->tail = 0;

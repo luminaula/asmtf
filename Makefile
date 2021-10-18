@@ -1,6 +1,6 @@
 IDIR=./inc
 CC=gcc
-CFLAGS=-ggdb -Wextra -Werror -masm=intel -I${IDIR} -lpthread
+CFLAGS=-ggdb -Wextra -Werror -masm=intel -std=c17 -I${IDIR} -lpthread
 OBJ=main.o threadpool.o
 
 %.o : %.c

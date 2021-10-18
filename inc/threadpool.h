@@ -74,13 +74,23 @@ typedef struct asmtf_task_buffer_t {
     pthread_mutex_t mutex;
 } asmtf_task_buffer_t;
 
+
+typedef struct asmtf_threadpool_task_buffer_t{
+    void *data;
+
+} asmtf_threadpool_task_buffer_t;
+
+
+
 typedef struct asmtf_thread_t {
     uint64_t index[16];
     pthread_t handle;
     asmtf_task_t *task;
     struct asmtf_thread_t *partner;
     asmtf_task_buffer_t *task_buffer;
-    atomic_bool *running;   
+    atomic_bool *running;
+    atomic_ullong *states;
+    uint64_t states_count;
 } asmtf_thread_t;
 
 typedef struct asmtf_threadpool_t {

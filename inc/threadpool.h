@@ -12,6 +12,7 @@
 #include <stdatomic.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdarg.h>
 
 #define ASMTF_THREAD_LOAD_TASK(task) \
         ASMTF_THREAD_LOAD_REGISTER(0,task);\
@@ -64,14 +65,9 @@ typedef struct asmtf_task_t {
 
 
 typedef struct asmtf_task_buffer_t {
-    asmtf_task_t *base;
-    asmtf_task_t *ceiling;
-    uint64_t size;
-    uint64_t tail;
-    atomic_ulong head;
-    pthread_cond_t cv;
-    pthread_condattr_t cv_attr;
-    pthread_mutex_t mutex;
+    void *base;
+    uint64_t capacity;
+    atomic_ullong tasks_count;
 } asmtf_task_buffer_t;
 
 
@@ -85,9 +81,9 @@ typedef struct asmtf_threadpool_task_buffer_t{
 typedef struct asmtf_thread_t {
     uint64_t index[16];
     pthread_t handle;
-    asmtf_task_t *task;
-    struct asmtf_thread_t *partner;
-    asmtf_task_buffer_t *task_buffer;
+    asmtf_task_t *p_task;
+    struct asmtf_thread_t *p_partner;
+    asmtf_task_buffer_t *p_task_buffer;
     atomic_bool *running;
     atomic_ullong *states;
     uint64_t states_count;
@@ -96,13 +92,17 @@ typedef struct asmtf_thread_t {
 typedef struct asmtf_threadpool_t {
     asmtf_thread_t **threads;
     uint64_t thread_count;
+    atomic_ullong robin;
 } asmtf_threadpool_t;
 
+void *asmtf_thread_steal_task(asmtf_threadpool_t *pool);
+asmtf_task_t *asmtf_thread_get_next_task(asmtf_task_buffer_t *data);
 void *asmtf_thread_loop(void *data);
 
 void asmtf_init_thread(asmtf_thread_t **thread);
 asmtf_threadpool_t *asmtf_threadpool_create(size_t count);
-asmtf_task_t *asmtf_thread_get_next_task(asmtf_task_buffer_t *data);
 void asmtf_threadpool_wait(asmtf_threadpool_t *pool);
+
+void asmtf_threadpool_enqueue_(asmtf_threadpool_t *pool, void *p_function, int arg_count, ...);
 
 #endif

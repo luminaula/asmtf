@@ -72,12 +72,9 @@ void asmtf_init_thread(asmtf_thread_t **thread) {
 
     //align buffer to cache lines
     task_buffer->base = aligned_alloc(64, sizeof(asmtf_task_t) * 1024);
-    task_buffer->size = 1024;
-    task_buffer->tail = 0;
-    task_buffer->ceiling = &task_buffer->base[1024];
+    task_buffer->capacity = 1024;
     pthread_cond_init(&task_buffer->cv, &task_buffer->cv_attr);
 
-    atomic_init(&task_buffer->head, 0);
 
     (*thread)->task_buffer = task_buffer;
     (*thread)->running = calloc(1, sizeof(atomic_bool));
@@ -102,4 +99,10 @@ asmtf_threadpool_t *asmtf_threadpool_create(uint64_t count) {
 void asmtf_threadpool_wait(asmtf_threadpool_t *pool) {
     while (1) {
     }
+}
+
+void asmtf_threadpool_enqueue_(asmtf_threadpool_t *pool, void *p_function, int arg_count, ...) {
+    va_list arg_list;
+    asmtf_task_t *p_task;
+    va_start(arg_list, arg_count);
 }

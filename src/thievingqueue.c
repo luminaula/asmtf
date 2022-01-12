@@ -10,5 +10,5 @@
 
 asmtf_thieving_queue *asmtf_thieving_queue_create() {
     asmtf_thieving_queue *queue = calloc(1, sizeof(asmtf_thieving_queue));
-    queue->data = calloc(1,ASMTF_SLAB_SIZE))
+    queue->data = calloc(1,ASMTF_QUEUE_SLAB_SIZE);
 }

@@ -40,16 +40,16 @@ void *asmtf_thread_loop(void *data) {
 
     while (atomic_load(thread.running)) {
         do {
-            thread.task = asmtf_thread_get_next_task(thread.task_buffer);
-        } while (!thread.task);
+            thread.p_task = asmtf_thread_get_next_task(thread.p_task_buffer);
+        } while (!thread.p_task);
 
-        uintptr_t tptr = atomic_exchange(&thread.task->p_function, 0);
+        uintptr_t tptr = atomic_exchange(&thread.p_task->p_function, 0);
         if (!tptr) {
             continue;
         }
         //Save state to stack
         ASMTF_THREAD_STORE_REGISTERS(thread);
-        ASMTF_THREAD_LOAD_TASK_P(thread.task);
+        ASMTF_THREAD_LOAD_TASK_P(thread.p_task);
         __asm__("call %0\n\t"
                 :
                 : "m"(tptr)
@@ -76,7 +76,7 @@ void asmtf_init_thread(asmtf_thread_t **thread) {
     pthread_cond_init(&task_buffer->cv, &task_buffer->cv_attr);
 
 
-    (*thread)->task_buffer = task_buffer;
+    (*thread)->p_task_buffer = task_buffer;
     (*thread)->running = calloc(1, sizeof(atomic_bool));
 
     atomic_init((*thread)->running, 1);

@@ -68,6 +68,9 @@ typedef struct asmtf_task_buffer_t {
     void *base;
     uint64_t capacity;
     atomic_ullong tasks_count;
+    pthread_cond_t cv;
+    pthread_mutex_t mutex;
+    pthread_condattr_t cv_attr;
 } asmtf_task_buffer_t;
 
 

@@ -23,7 +23,6 @@
 
 
 
-
 typedef struct asmtf_thieving_queue_block_header{
     atomic_ulong header;
 } asmtf_thieving_queue_block;
